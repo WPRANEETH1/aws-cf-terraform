@@ -1,3 +1,4 @@
+# Create a primary VPC
 resource "aws_vpc" "primary_vpc" {
   cidr_block = var.cidr_block_primary
 
@@ -12,6 +13,7 @@ resource "aws_vpc" "primary_vpc" {
   )
 }
 
+# Create an Internet Gateway and associate it with the VPC
 resource "aws_internet_gateway" "internet_gateway" {
   vpc_id = aws_vpc.primary_vpc.id
 
@@ -23,6 +25,7 @@ resource "aws_internet_gateway" "internet_gateway" {
   )
 }
 
+# Allocate an Elastic IP (EIP) for the NAT Gateway
 resource "aws_eip" "nat_eip" {
   count  = var.create_natgw ? 1 : 0
   domain = "vpc"
@@ -35,6 +38,7 @@ resource "aws_eip" "nat_eip" {
   )
 }
 
+# Create a NAT Gateway
 resource "aws_nat_gateway" "nat_gateway" {
   count      = var.create_natgw ? 1 : 0
   depends_on = [aws_internet_gateway.internet_gateway]

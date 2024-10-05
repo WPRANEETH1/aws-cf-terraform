@@ -1,3 +1,4 @@
+# Create a DB Subnet Group for the MariaDB instance
 resource "aws_db_subnet_group" "mariadb_subnet_group" {
 
   name       = join("-", [var.vpc_name, var.project, var.environment, "mariadb-subnet-group"])
@@ -11,6 +12,7 @@ resource "aws_db_subnet_group" "mariadb_subnet_group" {
   )
 }
 
+# Create a Security Group for MariaDB
 resource "aws_security_group" "mariadb_sg" {
   name   = join("-", [var.vpc_name, var.project, var.environment, "mariadb-sg"])
   vpc_id = var.vpc_id
@@ -86,6 +88,7 @@ resource "aws_db_instance" "mariadb_reader" {
   )
 }
 
+# Store the MariaDB master instance endpoint in AWS Systems Manager Parameter Store
 resource "aws_ssm_parameter" "db_endpoint" {
   name        = "DB_HOST"
   description = "Database endpoint for the application"

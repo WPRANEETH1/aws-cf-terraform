@@ -1,3 +1,4 @@
+# Define local variables for tags
 locals {
   tags = {
     Project     = var.project,
@@ -7,6 +8,7 @@ locals {
   description = "Extra tags to billing/ organization policy"
 }
 
+# VPC module configuration
 module "vpc_module" {
   source                     = "./modules/vpc"
   vpc_name                   = var.vpc_name
@@ -21,6 +23,7 @@ module "vpc_module" {
   create_natgw               = true
 }
 
+# EC2 instance for SSM module configuration
 module "ec2_ssm_module" {
   depends_on = [module.vpc_module]
 
@@ -38,6 +41,7 @@ module "ec2_ssm_module" {
   public_ip_address       = true
 }
 
+# MariaDB RDS module configuration
 module "mariadb_module" {
   depends_on = [module.ec2_ssm_module]
 
@@ -54,6 +58,7 @@ module "mariadb_module" {
   password                = "DevOps123"
 }
 
+# EC2 service module configuration
 module "ec2_service_module" {
   depends_on = [module.mariadb_module]
 
@@ -72,6 +77,7 @@ module "ec2_service_module" {
   mariadb_sg    = module.mariadb_module.mariadb_sg
 }
 
+# CDN (CloudFront) module configuration
 module "cdn_module" {
   depends_on = [module.ec2_service_module]
 
@@ -81,11 +87,13 @@ module "cdn_module" {
   dns_name    = module.ec2_service_module.output_nlb_dns_name
 }
 
+# Output for CloudFront URL
 output "cloudfront_url" {
   description = "The URL of the CloudFront distribution"
   value       = "https://${module.cdn_module.cloudfront_url}"
 }
 
+# Output for EC2 service URL through CloudFront
 output "ec2_service_url" {
   description = "The URL of the EC2 Server through CloudFront distribution"
   value       = "https://${module.cdn_module.cloudfront_url}/api/"
